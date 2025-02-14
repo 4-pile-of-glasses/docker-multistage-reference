@@ -1,0 +1,15 @@
+FROM python:3.9-alpine
+
+WORKDIR /app
+
+RUN apk update && apk add --update --no-cache bash openssh curl && apk cache clean
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Create logs directory
+RUN mkdir -p /app/logs
+
+CMD ["python", "agent.py"]
