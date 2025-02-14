@@ -1,15 +1,18 @@
-FROM python:3.9-alpine
-
+# Stage 1: Base Image
+FROM python:3.9-alpine AS Builder
 WORKDIR /app
-
 RUN apk update && apk add --update --no-cache bash openssh curl && apk cache clean
-
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --target=/app/requirements -r requirements.txt
 
+
+# Stage 2: Final Image
+FROM python:3.9-alpine
+WORKDIR /app
+COPY --from=builder /app/requirements /usr/local/lib/python3.9/site-packages/
 COPY . .
 
 # Create logs directory
 RUN mkdir -p /app/logs
 
-CMD ["python", "agent.py"]
+CMD ["python3", "agent.py"]
